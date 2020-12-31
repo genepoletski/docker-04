@@ -32,7 +32,7 @@ const redisClient = redis.createClient({
     retry_strategy: () => 1000
 });
 
-const redisPublisher = redis.duplicate();
+const redisPublisher = redisClient.duplicate();
 
 // Express rounte handlers
 app.get("/", (req, res) => {
