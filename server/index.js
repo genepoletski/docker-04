@@ -19,14 +19,10 @@ const pgPool = new Pool({
     port: keys.pgPort
 });
 
-pgPool.connect((err, pgClient, release) => {
-    if (err) {
-        return console.error('Error acquiring client', err.stack);
-    }
-
-    pgClient
+pgPool.on('connect', client => {
+    client
         .query("CREATE TABLE IF NOT EXISTS values (number INT)")
-        .catch(err => console.log(err));
+        .catch(err => console.error(err.stack));
 });
 
 // Redis Client Setup
@@ -45,13 +41,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/values/all", async (req, res) => {
-    try {
-        const pgClient = await pgPool.connect();
-        const values = await pgClient.query("SELECT * from values");
-        res.send(values.rows);
-    } catch (err) {
-        console.error(err.stack);
-    }
+    const values = await pgPool.query("SELECT * from values");
+    res.send(values.rows);
 });
 
 app.get("/values/current", async (req, res) => {
@@ -70,13 +61,7 @@ app.post("/values", async (req, res) => {
     redisClient.hset("values", index, "Nothing yet!");
     redisPublisher.publish("insert", index);
 
-    try {
-        const pgClient = await pgPool.connect();
-        await pgClient.query("INSERT INTO values(number) VALUES($1)", [index]);
-    } catch (err) {
-        console.error(err.stack);
-    }
-
+    await pgPool.query("INSERT INTO values(number) VALUES($1)", [index]);
     res.send({ working: true });
 });
 
