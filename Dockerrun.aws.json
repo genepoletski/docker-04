@@ -1,0 +1,36 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "client",
+      "image": "eugenepoletski/docker-04-client",
+      "hostname": "client",
+      "esseintial": false
+    },
+    {
+      "name": "server",
+      "image": "eugenepoletski/docker-04-server",
+      "hostname": "api",
+      "esseintial": false
+    },
+    {
+      "name": "worker",
+      "image": "eugenepoletski/docker-04-worker",
+      "hostname": "worker",
+      "esseintial": false
+    },
+    {
+      "name": "nginx",
+      "image": "eugenepoletski/docker-04-nginx",
+      "hostname": "nginx",
+      "esseintial": true,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "links": ["client", "server"]
+    }
+  ]
+}
