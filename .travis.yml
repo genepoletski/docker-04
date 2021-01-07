@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t eugenepoletski/docker-04-react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true eugenepoletski/docker-04-react-test npm test
+
+after_success:
+  - docker build -t eugenepoletski/docker-04-client ./client
+  - docker build -t eugenepoletski/docker-04-nginx ./nginx
+  - docker build -t eugenepoletski/docker-04-server ./server
+  - docker build -t eugenepoletski/docker-04-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push eugenepoletski/docker-04-client
+  - docker push eugenepoletski/docker-04-nginx
+  - docker push eugenepoletski/docker-04-server
+  - docker push eugenepoletski/docker-04-worker
